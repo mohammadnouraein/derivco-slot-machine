@@ -8,6 +8,31 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import getWinnings from "./calculateWin";
+import withStyles from "react-jss";
+
+const styles = {
+  payTable: {
+    width: (REEL_ITEM_WIDTH + 40) * 3,
+    margin: '50px auto',
+    fontSize: 12
+  },
+  formItemContainer: {
+    width: REEL_ITEM_WIDTH + 40,
+    display: 'inline-block',
+    verticalAlign: 'middle'
+  },
+  particularWinningRow: {
+    color: 'red',
+    animation: 'blinker 1s linear infinite'
+  }
+  ,
+  '@keyframes blinker': {
+    '50%': {
+      opacity: 0
+    }
+  }
+
+};
 class App extends Component {
   constructor() {
     super();
@@ -18,7 +43,7 @@ class App extends Component {
       mode: 'random',
 
       // reels contains reels data and we change the items when the spin butten pressed
-      reels: [],
+      reels: null,
 
       // debugModeItems contains the target items and positions 
       debugModeItems: [],
@@ -26,9 +51,10 @@ class App extends Component {
       // reelsKey used for forcing to re render when we change the reels item in state
       reelsKey: '1',
 
-      // disabled means the availability of spin button for pressing
+      // spinning variable used for the availability of spin button for pressing
       // When we press spin and reels are spinning, the user can't do anything
-      disabled: false
+      spinning: false
+
     }
     this.setReels = this.setReels.bind(this);
     this.toggleDebugMode = this.toggleDebugMode.bind(this);
@@ -36,15 +62,19 @@ class App extends Component {
     this.updateBalance = this.updateBalance.bind(this);
   }
 
-  // When the spin button pressed, this method is calling
+  // When the spin button pressed, this method will be called
   // setReels method recalculates the reels items 
   setReels() {
-    const { mode, debugModeItems, balance } = this.state;
+    const { mode, debugModeItems, balance, reels } = this.state;
+    let isFirstTime = false
+    if (!reels) {
+      isFirstTime = true;
+    }
     if (balance < 1) {
       alert('Sorry. There is not enough balance. Please charge your account.');
       return;
     }
-    let reels = [0, 1, 2].map((reelId, index) => {
+    let newReels = [0, 1, 2].map((reelId, index) => {
       let currentItemPosition = REEL_POSITIONS[0];
       let currentItem = REEL_ITEMS[0];
       if (mode === 'random') {
@@ -67,23 +97,29 @@ class App extends Component {
         }
       }
     });
+    // We calculate the winning lines and many other data here
+    // But we wait until spinning end, to show the result to user
+    let winnings = getWinnings(newReels.map(r => r.data));
 
     // We change the reels items and by changing the key we force to rerender even the object refrences not change 
     this.setState({
       winnings: null,
-      reels,
+      reels: newReels,
       reelsKey: 'A' + parseInt(Math.random() * 10000),
-      disabled: true,
-      balance: balance - 1
+      spinning: true,
+      balance: isFirstTime ? balance : balance - 1,
+      isFirstTime
     });
+
     window.setTimeout(() => {
-      let winnings = getWinnings(reels.map(r => r.data));
+
+      // We show the winning table to user and release the disabled form
       this.setState({
-        disabled: false,
+        spinning: false,
         winnings
       })
     }
-      , SPIN_DURATION + (reels.length - 1) * 500)
+      , SPIN_DURATION + (newReels.length - 1) * 500)
 
   }
 
@@ -126,6 +162,7 @@ class App extends Component {
 
   }
 
+  // Handler for changing balance in debug mode by editing balance textbox
   updateBalance(e) {
     let newVal = e.target.value;
     if (newVal > 5000 || newVal < 1) {
@@ -134,22 +171,25 @@ class App extends Component {
     }
     this.setState({ balance: newVal })
   }
+
+
   render() {
-    const { reels, mode, debugModeItems, reelsKey, disabled, winnings } = this.state;
+    const { reels, mode, debugModeItems, reelsKey, spinning, winnings, isFirstTime } = this.state;
+    const { classes } = this.props
     return (
       <div style={{ textAlign: 'center' }}>
-        <Reels key={reelsKey} reels={reels} />
+        <Reels key={reelsKey} reels={reels} winnings={winnings}/>
         <div style={{ margin: '10px 0px 20px 0px' }}>
           {mode === 'debug' && [0, 1, 2].map(index => {
             return (
-              <div key={'debug_items_container_' + index} style={{ width: REEL_ITEM_WIDTH + 40, display: 'inline-block' }}>
+              <div key={'debug_items_container_' + index} className={classes.formItemContainer}>
                 <Select
                   key={'debug_item_' + index}
                   value={debugModeItems[index] ? debugModeItems[index].item : REEL_ITEMS[0]}
                   onChange={(e) => this.updateDebugModeItems(index, null, e.target.value)}
                   displayEmpty
                   name="Item"
-                  disabled={disabled}
+                  disabled={spinning}
                 >
                   {REEL_ITEMS.map(reelItem => <MenuItem key={reelItem} value={reelItem}>{reelItem}</MenuItem>)}
 
@@ -160,7 +200,7 @@ class App extends Component {
                   onChange={(e) => this.updateDebugModeItems(index, e.target.value, null)}
                   displayEmpty
                   name="Position"
-                  disabled={disabled}
+                  disabled={spinning}
                 >
                   {REEL_POSITIONS.map(reelPosition => <MenuItem key={reelPosition} value={reelPosition}>{reelPosition}</MenuItem>)}
 
@@ -170,11 +210,11 @@ class App extends Component {
         </div>
 
 
-        <div style={{ width: REEL_ITEM_WIDTH + 40, display: 'inline-block', verticalAlign: 'middle' }}>
+        <div className={classes.formItemContainer}>
           <FormControlLabel
             control={
               <Switch
-                disabled={disabled}
+                disabled={spinning}
                 disableRipple
                 checked={this.state.mode === 'debug'}
                 onChange={this.toggleDebugMode}
@@ -186,36 +226,53 @@ class App extends Component {
         </div>
 
 
-        <div style={{ width: REEL_ITEM_WIDTH + 40, display: 'inline-block', verticalAlign: 'middle' }}>
+        <div className={classes.formItemContainer}>
           <TextField
             label="Balance"
             value={this.state.balance}
             onChange={this.updateBalance}
             margin="none"
             type="number"
-            disabled={disabled || mode !== 'debug'}
+            disabled={spinning || mode !== 'debug'}
           />
         </div>
 
 
-        <div style={{ width: REEL_ITEM_WIDTH + 40, display: 'inline-block', verticalAlign: 'middle' }}>
+        <div className={classes.formItemContainer}>
           <Fab
             variant="round"
             size="large"
             color="primary"
             aria-label="Spin"
             onClick={this.setReels}
-            disabled={disabled}
+            disabled={spinning}
           >Spin</Fab>
         </div>
 
-
-        {winnings && mode === 'debug' && winnings.map((winItem,index) => {
-          return (<div key={'winning_' + index}>{winItem.winningLine}-{winItem.winningValue}</div>)
-        })}
+        {!spinning && !isFirstTime && (<table border={1} className={classes.payTable}>
+          <thead>
+            <tr>
+              <th>Winning line</th>
+              <th>Winning value</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {winnings && winnings.map((winItem, index) => {
+              return (<tr key={'winning_' + index} className={winItem.winningValue >= 1000 ? classes.particularWinningRow : ''}>
+                <td>{winItem.winningLine}({winItem.winningLineData.map(item => !item ? '○' : item).join(',')})</td>
+                <td>{winItem.winningValue}</td>
+                <td>{winItem.winningDescription}</td>
+              </tr>)
+            })}
+            {(!winnings || winnings.length == 0) && (<tr>
+              <td colspan={3}>Sorry you have no winning in this round</td>
+            </tr>)}
+          </tbody>
+        </table>)}
       </div>
     );
   }
 }
-
-export default App;
+const StyledApp = withStyles(styles)(App);
+export default StyledApp;

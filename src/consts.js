@@ -32,6 +32,17 @@ const SPIN_SMOOTHNESS = 0.9;
 // Default value is set to (REEL_ITEMS.length x 2)
 const SPIN_SPEED = REEL_ITEMS.length * 2;
 
+const WINNING_DESCRIPTIONS=[
+    '3 CHERRY symbols on top line 2000',
+    '3 CHERRY symbols on center line 1000',
+    '3 CHERRY symbols on bottom line 4000',
+    '3 7 symbols on any line 150',
+    'Any combination of CHERRY and 7 on any line 75 ',
+    '3 3xBAR symbols on any line 50',
+    '3 2xBAR symbols on any line 20',
+    '3 BAR symbols on any line 10',
+    'Combination of any BAR symbols on any line 5'
+    ]
 
 export {
     REEL_ITEMS,
@@ -41,5 +52,6 @@ export {
     SPIN_DURATION,
     SPIN_SMOOTHNESS,
     SPIN_SPEED,
-    REEL_POSITIONS
+    REEL_POSITIONS,
+    WINNING_DESCRIPTIONS
 }

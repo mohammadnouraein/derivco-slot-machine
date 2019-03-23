@@ -1,4 +1,4 @@
-import { REEL_ITEMS, REEL_POSITIONS } from "./consts";
+import { REEL_ITEMS, REEL_POSITIONS ,WINNING_DESCRIPTIONS} from "./consts";
 
 // Winning states are :
 //
@@ -25,7 +25,9 @@ export default function (reels) {
         if (lineItem[0] === lineItem[1] && lineItem[1]=== lineItem[2] && lineItem[2]=== 'Cherry' && lineIndex === 0) {
             winnings.push({
                 winningValue: 2000,
-                winningLine: REEL_POSITIONS[0]//top
+                winningLine: REEL_POSITIONS[0],//top
+                winningLineData:lineItem,
+                winningDescription:WINNING_DESCRIPTIONS[0]
             })
         }
 
@@ -33,7 +35,9 @@ export default function (reels) {
         if (lineItem[0] === lineItem[1] && lineItem[1]=== lineItem[2] && lineItem[2]=== 'Cherry' && lineIndex === 1) {
             winnings.push({
                 winningValue: 1000,
-                winningLine: REEL_POSITIONS[1]//center
+                winningLine: REEL_POSITIONS[1],//center
+                winningLineData:lineItem,
+                winningDescription:WINNING_DESCRIPTIONS[1]
             })
         }
 
@@ -41,7 +45,9 @@ export default function (reels) {
         if (lineItem[0] === lineItem[1] && lineItem[1]=== lineItem[2] && lineItem[2]=== 'Cherry' && lineIndex === 2) {
             winnings.push({
                 winningValue: 4000,
-                winningLine: REEL_POSITIONS[2]//bottom
+                winningLine: REEL_POSITIONS[2],//bottom
+                winningLineData:lineItem,
+                winningDescription:WINNING_DESCRIPTIONS[2]
             })
         }
 
@@ -49,7 +55,9 @@ export default function (reels) {
         if (lineItem[0] === lineItem[1] && lineItem[1]=== lineItem[2] && lineItem[2]=== '7') {
             winnings.push({
                 winningValue: 150,
-                winningLine: REEL_POSITIONS[lineIndex]
+                winningLine: REEL_POSITIONS[lineIndex],
+                winningLineData:lineItem,
+                winningDescription:WINNING_DESCRIPTIONS[3]
             })
         }
 
@@ -57,10 +65,14 @@ export default function (reels) {
         if (['7', 'Cherry'].indexOf(lineItem[0]) !== -1
             && ['7', 'Cherry'].indexOf(lineItem[1]) !== -1
             && ['7', 'Cherry'].indexOf(lineItem[2]) !== -1
+
+            && !(lineItem[0]===lineItem[1] && lineItem[1]===lineItem[2])
         ) {
             winnings.push({
                 winningValue: 75,
-                winningLine: REEL_POSITIONS[lineIndex]
+                winningLine: REEL_POSITIONS[lineIndex],
+                winningLineData:lineItem,
+                winningDescription:WINNING_DESCRIPTIONS[4]
             })
         }
 
@@ -68,7 +80,9 @@ export default function (reels) {
         if (lineItem[0] === lineItem[1] && lineItem[1]=== lineItem[2] && lineItem[2]=== '3xBAR') {
             winnings.push({
                 winningValue: 50,
-                winningLine: REEL_POSITIONS[lineIndex]
+                winningLine: REEL_POSITIONS[lineIndex],
+                winningLineData:lineItem,
+                winningDescription:WINNING_DESCRIPTIONS[5]
             })
         }
 
@@ -76,7 +90,9 @@ export default function (reels) {
         if (lineItem[0] === lineItem[1] && lineItem[1]=== lineItem[2] && lineItem[2]=== '2xBAR') {
             winnings.push({
                 winningValue: 20,
-                winningLine: REEL_POSITIONS[lineIndex]
+                winningLine: REEL_POSITIONS[lineIndex],
+                winningLineData:lineItem,
+                winningDescription:WINNING_DESCRIPTIONS[6]
             })
         }
 
@@ -84,7 +100,9 @@ export default function (reels) {
         if (lineItem[0] === lineItem[1] && lineItem[1]=== lineItem[2] && lineItem[2]=== 'BAR') {
             winnings.push({
                 winningValue: 10,
-                winningLine: REEL_POSITIONS[lineIndex]
+                winningLine: REEL_POSITIONS[lineIndex],
+                winningLineData:lineItem,
+                winningDescription:WINNING_DESCRIPTIONS[7]
             })
         }
 
@@ -92,7 +110,9 @@ export default function (reels) {
         if (lineItem[0] === 'BAR' || lineItem[1] === 'BAR' || lineItem[2] === 'BAR') {
             winnings.push({
                 winningValue: 5,
-                winningLine: REEL_POSITIONS[lineIndex]
+                winningLine: REEL_POSITIONS[lineIndex],
+                winningLineData:lineItem,
+                winningDescription:WINNING_DESCRIPTIONS[8]
             })
         }
     })

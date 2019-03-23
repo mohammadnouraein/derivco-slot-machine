@@ -3,7 +3,7 @@ import { PropTypes } from "prop-types";
 import withStyles from "react-jss";
 
 import { Reel } from "./Reel";
-import { REEL_ITEM_HEIGHT, REEL_ITEM_WIDTH } from '../../consts';
+import { REEL_ITEM_HEIGHT, REEL_ITEM_WIDTH, REEL_POSITIONS } from '../../consts';
 
 const styles = {
     horizontalLine: {
@@ -11,6 +11,16 @@ const styles = {
         width: '100%',
         left: 0,
         border: 'solid 2px white'
+    },
+    winningHorizontalLine: {
+        position: 'absolute',
+        left: -1,
+        width: '100%',
+        borderTop: 'solid 5px red',
+        animation: 'blinker 1s linear infinite',
+        borderBottom: 'solid 5px red',
+        height: 3,
+        backgroundColor: 'white'
     },
     reelsContainer: {
 
@@ -24,6 +34,11 @@ const styles = {
     reel: {
         flex: 1,
         padding: 10
+    },
+    '@keyframes blinker': {
+        '50%': {
+            opacity: 0
+        }
     }
 };
 
@@ -45,16 +60,32 @@ export default class ReelItems extends Component {
     }
 
     render() {
-        const { classes } = this.props;
+        const { classes, winnings } = this.props;
         const { reels } = this.state;
         if (!reels) {
             return <div>Loading ...</div>
         }
+        let hasParticularWinningInTop = false;
+        let hasParticularWinningInCenter = false;
+        let hasParticularWinningInBottom = false;
+
+        if (winnings) {
+            if (winnings.find(w => w.winningValue >= 1000 && w.winningLine === REEL_POSITIONS[0])) {
+                hasParticularWinningInTop = true;
+            }
+            if (winnings.find(w => w.winningValue >= 1000 && w.winningLine === REEL_POSITIONS[1])) {
+                hasParticularWinningInCenter = true;
+            }
+            if (winnings.find(w => w.winningValue >= 1000 && w.winningLine === REEL_POSITIONS[2])) {
+                hasParticularWinningInBottom = true;
+            }
+        }
+
         return (
             <div className={classes.reelsContainer} style={{ width: reels.length * (REEL_ITEM_WIDTH + 40) }}>
-                <hr className={classes.horizontalLine} style={{ top: REEL_ITEM_HEIGHT / 2 }} />
-                <hr className={classes.horizontalLine} style={{ top: REEL_ITEM_HEIGHT }} />
-                <hr className={classes.horizontalLine} style={{ top: REEL_ITEM_HEIGHT * 3 / 2 }} />
+                <hr className={hasParticularWinningInTop ? classes.winningHorizontalLine : classes.horizontalLine} style={{ top: REEL_ITEM_HEIGHT / 2 }} />
+                <hr className={hasParticularWinningInCenter ? classes.winningHorizontalLine : classes.horizontalLine} style={{ top: REEL_ITEM_HEIGHT }} />
+                <hr className={hasParticularWinningInBottom ? classes.winningHorizontalLine : classes.horizontalLine} style={{ top: REEL_ITEM_HEIGHT * 3 / 2 }} />
                 {
                     reels.map(reel => <Reel key={reel.id} data={reel.data} />)
                 }
@@ -64,7 +95,8 @@ export default class ReelItems extends Component {
 }
 
 ReelItems.propTypes = {
-    reels: PropTypes.array
+    reels: PropTypes.array,
+    winnings: PropTypes.array
 };
 
 //Styled Reels generated here and returned as "Reels" component
