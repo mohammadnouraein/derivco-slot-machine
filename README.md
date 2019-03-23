@@ -13,3 +13,6 @@ After clonning the project
 
 2. Run the application 
 ### `npm start`
+
+## Online demo
+see online demo [here](http://slotmachine.ildirim.com)
